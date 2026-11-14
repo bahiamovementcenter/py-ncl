@@ -1,0 +1,29 @@
+[package]
+name = "py-ncl"
+version = "0.1.0"
+description = "Python bindings to Nickel, over nickel-embed"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/bahiamovementcenter/py-ncl"
+publish = false
+
+[lib]
+# Imported from Python as ncl._native; see pyproject.toml.
+name = "_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+# The engine, pinned to a rust-nickel release (see docs/bindings.md there). Bump it with
+# `cargo update -p nickel-embed` after changing the tag.
+nickel-embed = { git = "https://github.com/bahiamovementcenter/rust-nickel", rev = "268127d9cb3431eec6543e61e623541913209da2", features = ["packages"] }
+# abi3: one wheel per platform covers every Python from 3.9 on.
+serde_json = "1"
+# HTTPS for git dependencies in package manifests. nickel-embed's `packages` feature doesn't turn
+# it on yet; drop this once the pinned release does.
+gix = { version = "0.84", default-features = false, features = ["blocking-http-transport-reqwest-rust-tls"] }
+pyo3 = { version = "0.30", features = ["abi3-py39", "extension-module"] }
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+strip = "debuginfo"
